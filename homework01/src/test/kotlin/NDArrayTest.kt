@@ -98,4 +98,63 @@ internal class NDArrayTest {
         assertEquals(58, data.at(DefaultPoint(0, 1)))
         assertEquals(2, data.at(DefaultPoint(0, 2)))
     }
+    @Test
+    fun testDot1() {
+//a = np.array([[1, 0],
+//              [0, 1]])
+//b = np.array([[4, 1],
+//              [2, 2]])
+        val data = DefaultNDArray.ones(DefaultShape(2, 2))
+        val data2 = data.copy()
+
+        data.set(DefaultPoint(0, 1), 0)
+        data.set(DefaultPoint(1, 0), 0)
+        data2.set(DefaultPoint(0, 0), 4)
+        data2.set(DefaultPoint(1, 0), 2)
+        data2.set(DefaultPoint(1, 1), 2)
+
+        val dot = data.dot(data2)
+//4 1
+//2 2
+        assertEquals(4, dot.at(DefaultPoint(0, 0)))
+        assertEquals(1, dot.at(DefaultPoint(0, 1)))
+        assertEquals(2, dot.at(DefaultPoint(1, 0)))
+        assertEquals(2, dot.at(DefaultPoint(1, 1)))
+    }
+
+    @Test
+    fun testDot2() {
+//        a = np.array([[1, 0],
+//            [0, 1]])
+//        b = np.array([1, 2])
+        val data = DefaultNDArray.ones(DefaultShape(2, 2))
+        val data2 = DefaultNDArray.ones(DefaultShape(2))
+
+        data.set(DefaultPoint(0, 1), 0)
+        data.set(DefaultPoint(1, 0), 0)
+        data2.set(DefaultPoint(1), 2)
+
+        val dot = data.dot(data2)
+
+//  array([1, 2])
+        assertEquals(1, dot.at(DefaultPoint(0, 0)))
+        assertEquals(2, dot.at(DefaultPoint(0, 1)))
+    }
+
+    @Test
+    fun testDotThrows() {
+//        a = np.array([[1, 0],
+//            [0, 1]])
+//        b = np.array([1, 2])
+        val data = DefaultNDArray.ones(DefaultShape(2, 2))
+        val data2 = DefaultNDArray.ones(DefaultShape(2))
+
+        data.set(DefaultPoint(0, 1), 0)
+        data.set(DefaultPoint(1, 0), 0)
+        data2.set(DefaultPoint(1), 2)
+
+        assertThrows(NDArrayException.IllegalDotDimensions::class.java) {
+            data2.dot(data)
+        }
+    }
 }
