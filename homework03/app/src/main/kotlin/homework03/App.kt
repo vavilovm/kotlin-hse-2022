@@ -3,13 +3,36 @@
  */
 package homework03
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello World!"
-        }
-}
+import homework03.comment.Comment
+import homework03.comment.CommentsSnapshot
+import homework03.csv.csvSerialize
+import homework03.csv.write
+import homework03.topic.TopicSnapshot
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 
-fun main() {
-    println(App().greeting)
+fun main(args: Array<String>) = runBlocking {
+    if (args.size % 2 == 0 || args.size < 3) {
+        println("Number of arguments")
+        return@runBlocking
+    }
+    val path = args[0]
+
+    val topics: ArrayList<Deferred<TopicSnapshot>> = arrayListOf()
+    val comments: ArrayList<Deferred<CommentsSnapshot>> = arrayListOf()
+    val redditClient = RedditClient()
+    for (i in 1 until args.size step 2) {
+        val topic = args[i]
+        val comment = args[i + 1]
+        topics.add(async { redditClient.getTopic(topic) })
+        comments.add(async { redditClient.getComments(topic, comment) })
+    }
+
+    val topicsCsv = csvSerialize(topics.awaitAll(), TopicSnapshot::class)
+    write(topicsCsv, path, "--subjects.csv")
+
+    val commentsCsv = csvSerialize(comments.awaitAll().map { it.commentList() }.flatten(), Comment::class)
+    write(commentsCsv, path, "--comments.csv")
 }
